@@ -8,7 +8,7 @@ reference data, and numerical results.
 Open an issue using the title:
 
 ```text
-New benchmark proposal: PC-XXX short title
+New benchmark proposal: PA-XXX short title
 ````
 
 The proposal should include:
@@ -42,15 +42,15 @@ methods have submitted comparable results.
 Use:
 
 ```text
-cases/PC-XXX-short-title.md
+cases/PA-XXX-short-title.md
 ```
 
 Examples:
 
 ```text
-cases/PC-001-planar-one-phase-stefan.md
-cases/PC-003-sucking-interface.md
-cases/PC-004-scriven-spherical-bubble-growth.md
+cases/PA-001-planar-one-phase-stefan.md
+cases/PA-003-sucking-interface.md
+cases/PA-004-scriven-spherical-bubble-growth.md
 ```
 
 ## Result submissions
@@ -58,7 +58,7 @@ cases/PC-004-scriven-spherical-bubble-growth.md
 Numerical results should be submitted in:
 
 ```text
-data/PC-XXX/submissions/SOLVER_NAME/
+data/PA-XXX/submissions/SOLVER_NAME/
 ```
 
 with:

@@ -5,14 +5,14 @@ This repository contains benchmark definitions for phase-change numerical method
 The repository is organized around stable benchmark identifiers:
 
 ```text
-PC-001  Planar one-phase Stefan problem
-PC-002  Planar two-phase Stefan problem
-PC-003  Sucking interface problem
-PC-004  Scriven spherical vapor bubble growth
-PC-005  Frank disk
-PC-006  Frank sphere
+PA-001  Planar one-phase Stefan problem
+PA-002  Planar two-phase Stefan problem
+PA-003  Sucking interface problem
+PA-004  Scriven spherical vapor bubble growth
+PA-005  Frank disk
+PA-006  Frank sphere
 ...
-````
+```
 
 Each benchmark is described by a Markdown file in `cases/`.
 
@@ -31,16 +31,27 @@ test cases for comparing methods such as:
 * enthalpy methods,
 * phase-field methods.
 
-## Benchmark classes
+## Benchmark identifiers
 
-Benchmarks are classified into four levels.
+Benchmark identifiers follow the convention used in the historical
+InterfaceTracking benchmark collection.
 
-| Level | Type                         | Purpose                                                   |
-| ----- | ---------------------------- | --------------------------------------------------------- |
-| L1    | Analytical verification      | Check implementation against exact or similarity solution |
-| L2    | Semi-analytical verification | Compare against reduced model or ODE solution             |
-| L3    | Numerical reference          | Compare against high-resolution reference data            |
-| L4    | Experimental validation      | Compare against experimental measurements                 |
+| Prefix | Meaning |
+|---|---|
+| `N` | Purely numerical test-case |
+| `P` | Physical test-case |
+| `PA` | Physical test-case compared to an analytical solution |
+| `PN` | Physical test-case compared to a numerical reference method |
+| `PE` | Physical test-case compared to an experiment |
+| `PC` | Test of coherence |
+
+For example:
+
+```text
+PA-001  Planar one-phase Stefan problem
+PN-001  Film boiling benchmark with numerical reference data
+PE-001  Bubble detachment benchmark compared to experiment
+PC-001  Energy-balance coherence test
 
 ## Repository structure
 

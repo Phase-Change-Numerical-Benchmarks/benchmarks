@@ -1,11 +1,10 @@
 ---
-id: PC-XXX
+id: PA-XXX
 title: Benchmark title
 short_title: Short title
 status: draft
 
-level: L1
-reference_type: analytical
+benchmark_class: PA
 
 physics:
   - phase-change
@@ -43,7 +42,7 @@ references:
   - key: AuthorYear
 ---
 
-# PC-XXX — Benchmark title
+# PA-XXX — Benchmark title
 
 ## 1. Purpose
 
