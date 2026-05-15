@@ -42,7 +42,7 @@ references:
   - key: AuthorYear
 ---
 
-# PA-XXX — Benchmark title
+# PA-XXX - Benchmark title
 
 ## 1. Purpose
 
@@ -115,7 +115,7 @@ Specify every boundary.
 
 | Parameter | Symbol | Value | Unit |
 |---|---:|---:|---|
-| density | $\rho$ | ... | kg/m³ |
+| density | $\rho$ | ... | kg/m^3 |
 | heat capacity | $c_p$ | ... | J/(kg K) |
 | conductivity | $k$ | ... | W/(m K) |
 | latent heat | $L$ | ... | J/kg |
@@ -149,25 +149,30 @@ $$
 T(x,t) = ...
 $$
 
-## 9. Recommended numerical setup
+If reference data are provided, store them under:
 
-Suggested grids:
+```text
+data/PA-XXX/reference.csv
+```
 
-| Case | Grid | Time step | Final time |
-|---|---:|---:|---:|
-| coarse | ... | ... | ... |
-| medium | ... | ... | ... |
-| fine | ... | ... | ... |
+If a reference figure is provided, store it under:
 
-## 10. Quantities to report
+```text
+figures/PA-XXX-reference.svg
+```
+
+When possible, generate reference CSV files and figures from a script in
+`scripts/` instead of editing plotted SVG output by hand.
+
+## 9. Quantities to report
 
 Mandatory:
 
-- interface position $s(t)$,
-- error on $s(t)$,
+- interface position or radius,
+- error against the reference solution,
 - temperature profile at selected times,
 - global energy balance,
-- phase volume/mass conservation.
+- phase volume, area, or mass conservation.
 
 Optional:
 
@@ -176,9 +181,9 @@ Optional:
 - nonlinear iterations,
 - linear solver iterations.
 
-## 11. Error metrics
+## 10. Error metrics
 
-For interface position:
+For interface position or radius:
 
 $$
 E_s(t) = |s_h(t) - s_{\mathrm{ref}}(t)|.
@@ -203,49 +208,15 @@ E_{\mathrm{energy}}
 {|E(0)| + |Q_{\partial \Omega}(t)|}.
 $$
 
-## 12. Submission format
-
-Submit CSV files with the following columns.
-
-### Interface position
-
-```csv
-time,interface_position
-0.0,...
-...
-````
-
-### Temperature profile
-
-```csv
-time,x,T
-...
-```
-
-### Metadata
-
-```yaml
-solver: SolverName
-method: VOF / level-set / front-tracking / cut-cell / phase-field / enthalpy
-spatial_order: ...
-temporal_order: ...
-grid: ...
-time_step: ...
-interface_thickness: ...
-```
-
-## 13. Known difficulties
+## 11. Known difficulties
 
 List common traps:
 
 * wrong Stefan sign convention,
-* inaccurate interface gradient,
-* loss of mass conservation,
 * inconsistent latent heat balance,
-* thermal boundary layer under-resolution,
-* interface smearing,
-* topology changes.
+* inconsistent initial conditions,
+* inconsistent boundary conditions,
 
-## 14. References
+## 12. References
 
 Use BibTeX keys from `references.bib`.

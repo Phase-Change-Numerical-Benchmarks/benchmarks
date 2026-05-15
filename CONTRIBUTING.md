@@ -1,7 +1,6 @@
 # Contributing
 
-We welcome contributions of new phase-change benchmarks, corrections,
-reference data, and numerical results.
+We welcome contributions of new phase-change benchmarks, corrections, reference data, and numerical results.
 
 ## Proposing a new benchmark
 
@@ -9,7 +8,7 @@ Open an issue using the title:
 
 ```text
 New benchmark proposal: PA-XXX short title
-````
+```
 
 The proposal should include:
 
@@ -34,8 +33,6 @@ It can be marked `ready` only if:
 * quantities of interest are defined,
 * reference data or reference formula is available.
 
-It can be marked `community-tested` when at least two independent numerical
-methods have submitted comparable results.
 
 ## File naming
 
@@ -49,39 +46,7 @@ Examples:
 
 ```text
 cases/PA-001-planar-one-phase-stefan.md
-cases/PA-003-sucking-interface.md
-cases/PA-004-scriven-spherical-bubble-growth.md
-```
-
-## Result submissions
-
-Numerical results should be submitted in:
-
-```text
-data/PA-XXX/submissions/SOLVER_NAME/
-```
-
-with:
-
-```text
-metadata.yml
-interface_position.csv
-temperature_profile.csv
-figures/
-```
-
-## Required metadata
-
-```yaml
-solver: Solver name
-authors:
-  - Name
-method: VOF / level-set / front-tracking / cut-cell / phase-field / enthalpy
-grid_type: Cartesian / unstructured / adaptive
-spatial_resolution: ...
-time_step: ...
-final_time: ...
-interface_method: ...
-phase_change_model: ...
-date: YYYY-MM-DD
+cases/PA-002-planar-two-phase-stefan.md
+cases/PA-003-frank-disk.md
+cases/PA-004-frank-sphere.md
 ```

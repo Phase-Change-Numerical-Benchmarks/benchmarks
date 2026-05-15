@@ -59,7 +59,7 @@ Examples:
 
 - melting in a cavity
 - film boiling
-- Rayleigh-Bénard-like melting
+- Rayleigh-Benard-like melting
 
 ## By reference type
 
@@ -68,6 +68,15 @@ Examples:
 - reduced ODE solution
 - high-resolution numerical solution
 - experimental data
+
+## Current benchmark coverage
+
+| ID | Process | Geometry | Reference type | Primary numerical challenge |
+|---|---|---|---|---|
+| PA-001 | melting/solidification | 1D planar | exact similarity | one-sided gradient and latent-heat balance |
+| PA-002 | melting/solidification | 1D planar | exact similarity | two-sided heat-flux jump |
+| PA-003 | solidification | 2D disk | exact radial similarity | curvature, isotropy, and area conservation |
+| PA-004 | solidification | 3D sphere | exact radial similarity | surface integration, isotropy, and volume conservation |
 
 ## By numerical challenge
 

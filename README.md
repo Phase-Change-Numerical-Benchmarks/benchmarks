@@ -1,17 +1,15 @@
 # Phase-Change Numerical Benchmarks
 
-This repository contains benchmark definitions for phase-change numerical methods.
+This repository contains benchmark definitions for phase-change numerical
+methods.
 
 The repository is organized around stable benchmark identifiers:
 
 ```text
 PA-001  Planar one-phase Stefan problem
 PA-002  Planar two-phase Stefan problem
-PA-003  Sucking interface problem
-PA-004  Scriven spherical vapor bubble growth
-PA-005  Frank disk
-PA-006  Frank sphere
-...
+PA-003  Frank disk
+PA-004  Frank sphere
 ```
 
 Each benchmark is described by a Markdown file in `cases/`.
@@ -31,7 +29,7 @@ test cases for comparing methods such as:
 * enthalpy methods,
 * phase-field methods.
 
-## Benchmark identifiers
+## Benchmark Identifiers
 
 Benchmark identifiers follow the convention used in the historical
 InterfaceTracking benchmark collection.
@@ -52,28 +50,16 @@ PA-001  Planar one-phase Stefan problem
 PN-001  Film boiling benchmark with numerical reference data
 PE-001  Bubble detachment benchmark compared to experiment
 PC-001  Energy-balance coherence test
+```
 
-## Repository structure
+## Repository Structure
 
 ```text
 cases/       Benchmark descriptions
 data/        Reference data
 figures/     Problem sketches and reference plots
-scripts/     Utilities for plotting/checking data
-schemas/     Metadata schema
+scripts/     Reference data and plotting utilities
+references.bib  Bibliography
 ```
 
-## Minimal result submission
-
-A submitted result should contain:
-
-* solver name,
-* numerical method,
-* grid/time step,
-* material parameters,
-* interface representation,
-* error metrics,
-* CSV data for quantities of interest,
-* plots if useful.
-
-See `benchmark-template.md`.
+See `index.md` and `benchmark-template.md`.

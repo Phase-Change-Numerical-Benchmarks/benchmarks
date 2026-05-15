@@ -1,7 +1,8 @@
 ---
 id: PA-002
 title: Planar two-phase Stefan problem
-status: draft
+short_title: Two-phase Stefan slab
+status: ready
 benchmark_class: PA
 
 physics:
@@ -17,41 +18,47 @@ dimension: 1D
 geometry: planar
 interface_motion: moving
 
+reference_type: exact-similarity
+has_exact_solution: true
+has_reference_data: true
+reference_data:
+  - data/PA-002/reference.csv
+figures:
+  - figures/PA-002-reference.svg
+
 quantities_of_interest:
   - interface_position
   - temperature_profile
   - heat_flux_jump
   - energy_balance
   - convergence_rate
+
+references:
+  - AlexiadesSolomon1993
+  - Crank1975
 ---
 
-# PA-002 — Planar two-phase Stefan problem
+# PA-002 - Planar two-phase Stefan problem
 
 ## Purpose
 
-This benchmark verifies a two-sided Stefan problem where both phases solve heat diffusion.
+This benchmark verifies a two-sided Stefan problem where both phases solve heat
+diffusion. It tests conductivity and diffusivity contrasts, the two-sided
+Stefan condition, accurate interfacial gradients from both sides, and
+conservation of latent and sensible heat.
 
-It is intended to test:
+## Physical Configuration
 
-- heat diffusion in both phases,
-- the two-sided Stefan condition,
-- conductivity and diffusivity contrasts,
-- accurate interfacial gradients on both sides,
-- conservation of latent and sensible heat.
-
-## Physical configuration
-
-A planar interface separates two phases in a one-dimensional domain.
+A planar interface separates two phases in a one-dimensional infinite-domain
+similarity problem.
 
 ```text
 phase -                         phase +
 x < s(t)                        x > s(t)
 
-T_-∞ > T_m                      T_+∞ < T_m
+T_-inf > T_m                    T_+inf < T_m
 hot side                        cold side
 ```
-
-The interface position is $s(t)$. Both phases are thermally active.
 
 The normal direction is chosen from phase $-$ to phase $+$:
 
@@ -59,151 +66,102 @@ $$
 \mathbf n = \mathbf e_x.
 $$
 
-For the analytical similarity solution, the infinite-domain convention is used.  
-For a finite-domain numerical test, the computational domain should be large enough so that the outer boundaries do not affect the solution during the simulated time.
+For a finite-domain numerical test, the computational domain must be large
+enough that outer boundaries do not influence the solution over the simulated
+time interval.
 
-## Governing equations
+## Governing Equations
 
-In each phase $\Omega_i(t)$, with $i \in \{-,+\}$:
+In each phase $\Omega_i(t)$, $i\in\{-,+\}$,
 
 $$
-\rho_i c_{p,i} \partial_t T_i
+\rho_i c_{p,i}\partial_t T_i
 =
-\partial_x \left(k_i \partial_x T_i\right).
-$$
-
-The thermal diffusivity in each phase is:
-
-$$
-\alpha_i = \frac{k_i}{\rho_i c_{p,i}}.
-$$
-
-At the interface:
-
-$$
-T_-(s(t),t) = T_+(s(t),t) = T_m.
-$$
-
-The Stefan condition is:
-
-$$
-\rho L V_\Gamma
-=
-\left[\left[ k \nabla T \cdot \mathbf n \right]\right],
+\partial_x(k_i\partial_x T_i),
 $$
 
 with
 
 $$
-V_\Gamma = \frac{ds}{dt}.
+\alpha_i = \frac{k_i}{\rho_i c_{p,i}}.
 $$
 
-With the present one-dimensional convention,
+At the interface,
 
 $$
-\left[\left[ k \nabla T \cdot \mathbf n \right]\right]
-=
-k_+ \partial_x T_+(s(t)^+,t)
--
-k_- \partial_x T_-(s(t)^-,t).
+T_-(s(t),t)=T_+(s(t),t)=T_m.
 $$
 
-Therefore,
+With the present normal convention, the Stefan condition is
 
 $$
 \rho L \frac{ds}{dt}
 =
-k_+ \partial_x T_+(s(t)^+,t)
+k_+\partial_xT_+(s(t)^+,t)
 -
-k_- \partial_x T_-(s(t)^-,t).
+k_-\partial_xT_-(s(t)^-,t).
 $$
 
-## Boundary and initial conditions
+## Boundary And Initial Conditions
 
-The analytical solution is written for a semi-infinite configuration:
+The analytical solution uses far-field conditions
 
 $$
-T_-(x,t) \to T_{-\infty}
-\qquad \text{as } x \to -\infty,
+T_-(x,t)\to T_{-\infty}\quad\text{as }x\to-\infty,
 $$
 
 and
 
 $$
-T_+(x,t) \to T_{+\infty}
-\qquad \text{as } x \to +\infty.
+T_+(x,t)\to T_{+\infty}\quad\text{as }x\to+\infty,
 $$
 
-The far-field temperatures satisfy:
+with $T_{-\infty}>T_m$ and $T_{+\infty}<T_m$.
+
+Initialize a finite-domain simulation at $t_0>0$ from the analytical solution:
 
 $$
-T_{-\infty} > T_m,
-\qquad
-T_{+\infty} < T_m.
+s(t_0)=2\xi\sqrt{t_0}.
 $$
 
-At the interface:
+## Material Parameters
 
-$$
-T_\Gamma = T_m.
-$$
-
-For a finite-domain numerical test, initialize the solution at a small time $t_0>0$ using the analytical solution. This avoids the singular initial condition at $t=0$.
-
-The initial interface position is then:
-
-$$
-s(t_0) = 2 \xi \sqrt{t_0}.
-$$
-
-## Material parameters
-
-A simple dimensionless test case is recommended first.
+Use this dimensionless reference case first.
 
 | Parameter | Phase $-$ | Phase $+$ |
 |---|---:|---:|
 | $\rho$ | 1 | 1 |
 | $c_p$ | 1 | 1 |
 | $k$ | 1 | 1 |
-| $\alpha = k/(\rho c_p)$ | 1 | 1 |
-
-Suggested temperatures:
+| $\alpha=k/(\rho c_p)$ | 1 | 1 |
 
 | Quantity | Value |
 |---|---:|
 | $T_{-\infty}$ | 1 |
 | $T_m$ | 0 |
 | $T_{+\infty}$ | -0.25 |
+| $L$ | 1 |
 
-The latent heat $L$ controls the interface velocity. A first recommended choice is:
+The asymmetric far-field temperatures avoid the stationary balance obtained
+when the two heat fluxes exactly cancel.
 
-$$
-L = 1.
-$$
+## Reference Solution
 
-This asymmetric choice avoids the degenerate case where the heat supplied from the hot side and the heat removed by the cold side exactly balance.
-
-## Reference solution
-
-The two-phase planar Stefan problem admits a similarity solution.
-
-The interface position is:
+The interface position is
 
 $$
-s(t) = 2 \xi \sqrt{t},
+s(t)=2\xi\sqrt{t}.
 $$
 
-where $\xi$ is a constant determined by the Stefan condition.
-
-Define:
+Define
 
 $$
-\lambda_- = \frac{\xi}{\sqrt{\alpha_-}},
+\lambda_-=\frac{\xi}{\sqrt{\alpha_-}},
 \qquad
-\lambda_+ = \frac{\xi}{\sqrt{\alpha_+}}.
+\lambda_+=\frac{\xi}{\sqrt{\alpha_+}}.
 $$
 
-The temperature in phase $-$, for $x < s(t)$, is:
+For $x<s(t)$,
 
 $$
 T_-(x,t)
@@ -212,16 +170,13 @@ T_{-\infty}
 +
 (T_m-T_{-\infty})
 \frac{
-1+\operatorname{erf}
-\left(
-\dfrac{x}{2\sqrt{\alpha_- t}}
-\right)
+1+\operatorname{erf}\left(x/(2\sqrt{\alpha_-t})\right)
 }{
 1+\operatorname{erf}(\lambda_-)
 }.
 $$
 
-The temperature in phase $+$, for $x > s(t)$, is:
+For $x>s(t)$,
 
 $$
 T_+(x,t)
@@ -230,200 +185,72 @@ T_{+\infty}
 +
 (T_m-T_{+\infty})
 \frac{
-\operatorname{erfc}
-\left(
-\dfrac{x}{2\sqrt{\alpha_+ t}}
-\right)
+\operatorname{erfc}\left(x/(2\sqrt{\alpha_+t})\right)
 }{
 \operatorname{erfc}(\lambda_+)
 }.
 $$
 
-These expressions satisfy:
+The scalar equation for $\xi$ is
 
 $$
-T_-(s(t),t) = T_+(s(t),t) = T_m,
-$$
-
-$$
-T_-(x,t) \to T_{-\infty}
-\qquad \text{as } x \to -\infty,
-$$
-
-and
-
-$$
-T_+(x,t) \to T_{+\infty}
-\qquad \text{as } x \to +\infty.
-$$
-
-## Determination of the similarity parameter
-
-The interface velocity is:
-
-$$
-\frac{ds}{dt} = \frac{\xi}{\sqrt{t}}.
-$$
-
-The one-sided gradient in phase $-$ at the interface is:
-
-$$
-\partial_x T_-(s(t)^-,t)
+\rho L\xi
 =
 \frac{
-T_m-T_{-\infty}
+k_-(T_{-\infty}-T_m)
 }{
-\sqrt{\pi \alpha_- t}
-\left[
-1+\operatorname{erf}(\lambda_-)
-\right]
-}
-\exp(-\lambda_-^2).
-$$
-
-The one-sided gradient in phase $+$ at the interface is:
-
-$$
-\partial_x T_+(s(t)^+,t)
-=
--
-\frac{
-T_m-T_{+\infty}
-}{
-\sqrt{\pi \alpha_+ t}
-\operatorname{erfc}(\lambda_+)
-}
-\exp(-\lambda_+^2).
-$$
-
-Injecting these expressions into the Stefan condition gives the scalar equation for $\xi$:
-
-$$
-\rho L \xi
-=
-\frac{
-k_- (T_{-\infty}-T_m)
-}{
-\sqrt{\pi \alpha_-}
-\left[
-1+\operatorname{erf}(\lambda_-)
-\right]
+\sqrt{\pi\alpha_-}\left[1+\operatorname{erf}(\lambda_-)\right]
 }
 \exp(-\lambda_-^2)
 -
 \frac{
-k_+ (T_m-T_{+\infty})
+k_+(T_m-T_{+\infty})
 }{
-\sqrt{\pi \alpha_+}
-\operatorname{erfc}(\lambda_+)
+\sqrt{\pi\alpha_+}\operatorname{erfc}(\lambda_+)
 }
 \exp(-\lambda_+^2).
 $$
 
-with
+For the recommended dimensionless case,
 
 $$
-\lambda_- = \frac{\xi}{\sqrt{\alpha_-}},
-\qquad
-\lambda_+ = \frac{\xi}{\sqrt{\alpha_+}}.
+\xi = 0.239694222804215,
 $$
 
-This nonlinear scalar equation should be solved once before running the benchmark.
-
-## Dimensionless example
-
-For the simple case
+and therefore
 
 $$
-\rho = 1,
-\qquad
-c_{p,-}=c_{p,+}=1,
-\qquad
-k_- = k_+ = 1,
-\qquad
-\alpha_-=\alpha_+=1,
+s(t)=0.47938844560843\sqrt{t}.
 $$
 
-the interface position is:
+The file `data/PA-002/reference.csv` tabulates $s(t)$ and $T(x,t)$ for selected
+times and normalized coordinates.
 
-$$
-s(t) = 2\xi\sqrt{t}.
-$$
+![PA-002 reference interface position](../figures/PA-002-reference.svg)
 
-The temperature in phase $-$ becomes:
+## Recommended Numerical Setup
 
-$$
-T_-(x,t)
-=
-T_{-\infty}
-+
-(T_m-T_{-\infty})
-\frac{
-1+\operatorname{erf}
-\left(
-\dfrac{x}{2\sqrt{t}}
-\right)
-}{
-1+\operatorname{erf}(\xi)
-}.
-$$
+Use $-2 \le x \le 2$, initialize at $t_0=0.01$, and simulate to
+$t_\mathrm{end}=1$. Dirichlet far-field values at the two ends are acceptable
+if the boundaries remain far from the thermal layers.
 
-The temperature in phase $+$ becomes:
+## Quantities To Report
 
-$$
-T_+(x,t)
-=
-T_{+\infty}
-+
-(T_m-T_{+\infty})
-\frac{
-\operatorname{erfc}
-\left(
-\dfrac{x}{2\sqrt{t}}
-\right)
-}{
-\operatorname{erfc}(\xi)
-}.
-$$
+- interface position $s_h(t)$,
+- one-sided heat fluxes at the interface,
+- Stefan residual using the reported heat fluxes,
+- temperature profiles at $t=0.1$, $0.4$, and $1.0$,
+- global energy balance,
+- convergence rates for $s(t)$ and $T(x,t)$.
 
-The scalar equation for $\xi$ is:
-
-$$
-L \xi
-=
-\frac{1}{\sqrt{\pi}}
-\left[
-\frac{
-(T_{-\infty}-T_m)\exp(-\xi^2)
-}{
-1+\operatorname{erf}(\xi)
-}
--
-\frac{
-(T_m-T_{+\infty})\exp(-\xi^2)
-}{
-\operatorname{erfc}(\xi)
-}
-\right].
-$$
-
-For the suggested values
-
-$$
-T_{-\infty}=1,
-\qquad
-T_m=0,
-\qquad
-T_{+\infty}=-0.25,
-\qquad
-L=1,
-$$
-
-this equation has a positive solution corresponding to melting toward positive $x$.
-
-
-## Known difficulties
+## Known Difficulties
 
 - sign convention in the two-sided Stefan condition,
-- inverted material properties,
+- cancellation between hot-side and cold-side heat fluxes,
 - initialization from a nonzero time,
+- applying finite-domain boundaries too close to the interface.
+
+## References
+
+@AlexiadesSolomon1993
+@Crank1975

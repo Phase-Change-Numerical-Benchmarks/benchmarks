@@ -1,7 +1,8 @@
 ---
-id: PA-006
+id: PA-004
 title: Frank sphere
-status: draft
+short_title: Frank sphere
+status: ready
 benchmark_class: PA
 
 physics:
@@ -10,12 +11,19 @@ physics:
   - radial-symmetry
 
 process:
-  - melting
   - solidification
 
 dimension: 3D
 geometry: sphere
 interface_motion: moving
+
+reference_type: exact-similarity
+has_exact_solution: true
+has_reference_data: true
+reference_data:
+  - data/PA-004/reference.csv
+figures:
+  - figures/PA-004-reference.svg
 
 quantities_of_interest:
   - interface_radius
@@ -23,106 +31,191 @@ quantities_of_interest:
   - phase_volume
   - radial_symmetry_error
   - energy_balance
+
+references:
+  - Frank1950
+  - GibouFedkiw2005
+  - BernauerHerzog2011
+  - WenigerTorrilhon2025
 ---
 
-# PA-006 — Frank sphere
+# PA-004 - Frank sphere
 
 ## Purpose
 
-This benchmark verifies a radially symmetric three-dimensional phase-change
-problem.
+This benchmark verifies a radially symmetric three-dimensional Stefan problem in
+which a spherical solid nucleus grows into an undercooled liquid. It is the 3D
+counterpart of the Frank disk and tests surface heat-flux integration, volume
+conservation, radial symmetry, and 3D interface reconstruction.
 
-It is the 3D counterpart of the Frank disk test and is useful for testing:
+## Physical Configuration
 
-- spherical interface motion,
-- volume conservation,
-- surface heat-flux integration,
-- 3D interface reconstruction,
-- radial symmetry on Cartesian grids.
+The solid sphere is centered at the origin and the moving interface is
 
-## Physical configuration
-
-A spherical phase-change interface moves radially.
+$$
+r=R(t).
+$$
 
 ```text
-3D domain
-centered sphere of one phase
-moving spherical interface r = R(t)
-surrounding phase outside the sphere
+solid nucleus, T = T_m       liquid, T -> T_inf
+r < R(t)                    r > R(t)
 ```
 
-The reference solution is radial, but numerical methods may solve the full
-three-dimensional problem.
+The analytical reference is radial, but numerical methods should solve the full
+three-dimensional problem unless they are specifically radial solvers.
 
-## Governing equations
+## Governing Equations
 
-In the thermally active phase:
+Use the nondimensional heat equation in the thermally active liquid:
 
 $$
-\rho c_p \partial_t T
+\partial_tT=\nabla^2T,
+\qquad r>R(t).
+$$
+
+In radial form,
+
+$$
+\partial_tT
 =
-\frac{1}{r^2}
-\partial_r
-\left(
-r^2 k \partial_r T
-\right).
+\frac{1}{r^2}\partial_r(r^2\partial_rT).
 $$
 
-At the interface:
+The solid nucleus is held at the phase-change temperature,
 
 $$
-T(R(t),t) = T_m.
+T=0,\qquad r\le R(t).
 $$
 
-The Stefan condition is:
+At the moving interface,
 
 $$
-\rho L \frac{dR}{dt}
-=
-\left[\left[ k \nabla T \cdot \mathbf n \right]\right].
+T(R(t),t)=0,
 $$
 
-For a one-phase variant, only one side contributes to the heat flux.
+and
 
-## Boundary and initial conditions
+$$
+\frac{dR}{dt}=\mathrm{St}\,\partial_rT(R(t)^+,t).
+$$
 
-The exact configuration must state whether the sphere grows or shrinks.
+As in the disk case, $\mathrm{St}<0$ and $T_\infty<0$ produce outward growth.
 
-A typical setup is:
+## Boundary And Initial Conditions
 
-- spherical initial interface $R(t_0)=R_0$,
-- temperature initialized from the radial similarity solution,
-- outer boundary sufficiently far away,
-- fixed far-field or symmetry-compatible condition.
+The infinite-domain reference satisfies
 
-## Material parameters
+$$
+T(r,t)\to T_\infty
+\qquad\text{as }r\to\infty.
+$$
 
-Use a dimensionless setup first:
+Initialize at $t_0>0$ with
+
+$$
+R(t_0)=S_0\sqrt{t_0}.
+$$
+
+Use the exact radial temperature outside the sphere and $T=0$ inside it.
+
+## Material Parameters
+
+Use this nondimensional reference case.
 
 | Parameter | Symbol | Value |
 |---|---:|---:|
-| density | $\rho$ | 1 |
-| heat capacity | $c_p$ | 1 |
-| conductivity | $k$ | 1 |
-| diffusivity | $\alpha$ | 1 |
-| latent heat | $L$ | chosen |
+| thermal diffusivity | $\alpha$ | 1 |
 | phase-change temperature | $T_m$ | 0 |
+| Stefan coefficient | $\mathrm{St}$ | -0.4 |
+| similarity radius | $S_0$ | 1.2 |
+| initial time | $t_0$ | 0.1 |
+| final time | $t_\mathrm{end}$ | 1 |
+| far-field temperature | $T_\infty$ | -0.821 |
 
-## Reference solution
-
-The Frank sphere benchmark is based on a radially symmetric analytical or
-similarity solution in three space dimensions.
-
-The interface radius has the form:
+The full-precision value from the formula below is
 
 $$
-R(t) = 2\lambda \sqrt{\alpha t}
+T_\infty = -0.821033129452817.
 $$
 
-or the corresponding shrinking-front form, depending on the selected physical
-configuration.
+## Reference Solution
 
-## Known difficulties
+The interface radius is
 
-- inverted material properties,
-- initialization from $t_0>0$.
+$$
+R(t)=S_0\sqrt{t}.
+$$
+
+Let
+
+$$
+s=\frac{r}{\sqrt{t}},
+\qquad
+F(s)=\frac{\operatorname{erfc}(s/2)}{s}.
+$$
+
+The exact temperature field is
+
+$$
+T(r,t)
+=
+\begin{cases}
+0, & s\le S_0,\\
+T_\infty\left[1-\dfrac{F(s)}{F(S_0)}\right], & s>S_0.
+\end{cases}
+$$
+
+The far-field temperature is fixed by the Stefan condition:
+
+$$
+T_\infty
+=
+\frac{S_0F(S_0)}
+{-2\mathrm{St}F'(S_0)},
+$$
+
+with
+
+$$
+F'(s)
+=
+-\frac{\exp(-s^2/4)}{\sqrt{\pi}s}
+-
+\frac{\operatorname{erfc}(s/2)}{s^2}.
+$$
+
+The file `data/PA-004/reference.csv` tabulates $R(t)$ and $T(r,t)$ for selected
+times and normalized radii.
+
+![PA-004 Frank sphere reference temperature profile](../figures/PA-004-reference.svg)
+
+## Recommended Numerical Setup
+
+Use $\Omega=[-2,2]^3$, initialize at $t_0=0.1$, and simulate to
+$t_\mathrm{end}=1$. The exact final radius is
+
+$$
+R(1)=1.2.
+$$
+
+## Quantities To Report
+
+- volume-equivalent radius $R_h=(3V_h/(4\pi))^{1/3}$,
+- interface radius error over reconstructed interface points,
+- radial temperature profile sampled on axes and diagonals,
+- radial symmetry error,
+- phase volume error,
+- global energy balance.
+
+## Known Difficulties
+
+- Mullins-Sekerka-type instability can be triggered
+- Inconsistent initialization
+- a finite computational box can corrupt the far-field condition.
+
+## References
+
+@Frank1950
+@GibouFedkiw2005
+@BernauerHerzog2011
+@WenigerTorrilhon2025
