@@ -10,6 +10,13 @@ PA-001  Planar one-phase Stefan problem
 PA-002  Planar two-phase Stefan problem
 PA-003  Frank disk
 PA-004  Frank sphere
+PA-005  Sucking interface problem
+PA-006  Scriven spherical vapor bubble growth
+PA-007  Static evaporating film
+PA-008  Species-diffusion Stefan problem
+PA-009  Epstein-Plesset steady-radius dissolution
+PC-001  Constant-speed planar solidification
+PC-002  Constant-rate dissolving bubble
 ```
 
 Each benchmark is described by a Markdown file in `cases/`.
@@ -49,7 +56,7 @@ For example:
 PA-001  Planar one-phase Stefan problem
 PN-001  Film boiling benchmark with numerical reference data
 PE-001  Bubble detachment benchmark compared to experiment
-PC-001  Energy-balance coherence test
+PC-003  Energy-balance coherence test
 ```
 
 ## Repository Structure

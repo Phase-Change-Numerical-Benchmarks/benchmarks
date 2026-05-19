@@ -77,6 +77,13 @@ Examples:
 | PA-002 | melting/solidification | 1D planar | exact similarity | two-sided heat-flux jump |
 | PA-003 | solidification | 2D disk | exact radial similarity | curvature, isotropy, and area conservation |
 | PA-004 | solidification | 3D sphere | exact radial similarity | surface integration, isotropy, and volume conservation |
+| PA-005 | boiling/evaporation | 1D planar | exact similarity | Stefan flow and phase-volume expansion |
+| PA-006 | boiling/evaporation | 3D sphere | exact spherical similarity | spherical Stefan flow and large density ratio |
+| PA-007 | evaporation | 1D planar film | asymptotic solution | diffusion transient and film recession |
+| PA-008 | dissolution | 1D planar | exact similarity | species-driven interface displacement |
+| PA-009 | dissolution | 3D sphere | exact similarity | early-time spherical diffusion flux |
+| PC-001 | solidification | 1D planar | exact kinematic | prescribed moving Dirichlet boundary |
+| PC-002 | dissolution | 2D/axisymmetric bubble | exact kinematic | prescribed mass-transfer shrinkage |
 
 ## By numerical challenge
 
