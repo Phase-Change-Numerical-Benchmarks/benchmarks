@@ -15,6 +15,19 @@ PA-006  Scriven spherical vapor bubble growth
 PA-007  Static evaporating film
 PA-008  Species-diffusion Stefan problem
 PA-009  Epstein-Plesset steady-radius dissolution
+PA-010  Epstein-Plesset dissolving bubble
+PA-011  Binary-alloy solidification (Rubinstein)
+PA-012  d2-law evaporating droplet
+PA-013  Nusselt laminar film condensation
+PN-001  Film boiling on a horizontal wall
+PE-001  Gallium melting in a side-heated cavity
+PC-001  Constant-speed planar solidification
+PC-002  Constant-rate dissolving bubble
+PA-005  Sucking interface problem
+PA-006  Scriven spherical vapor bubble growth
+PA-007  Static evaporating film
+PA-008  Species-diffusion Stefan problem
+PA-009  Epstein-Plesset steady-radius dissolution
 PC-001  Constant-speed planar solidification
 PC-002  Constant-rate dissolving bubble
 ```

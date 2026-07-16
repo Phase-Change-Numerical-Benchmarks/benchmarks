@@ -11,6 +11,12 @@
 | PA-007 | [Static evaporating film](cases/PA-007-static-evaporating-film.md) | PA | ready | asymptotic reference |
 | PA-008 | [Species-diffusion Stefan problem](cases/PA-008-species-diffusion-stefan.md) | PA | ready | exact similarity |
 | PA-009 | [Epstein-Plesset steady-radius dissolution](cases/PA-009-epstein-plesset-steady-radius-dissolution.md) | PA | ready | exact similarity |
+| PA-010 | [Epstein-Plesset dissolving bubble](cases/PA-010-epstein-plesset-dissolving-bubble.md) | PA | ready | semi-analytical ODE |
+| PA-011 | [Binary-alloy solidification (Rubinstein)](cases/PA-011-binary-alloy-solidification.md) | PA | ready | exact similarity |
+| PA-012 | [d2-law evaporating droplet](cases/PA-012-d2-law-droplet-evaporation.md) | PA | ready | quasi-steady analytical |
+| PA-013 | [Nusselt laminar film condensation](cases/PA-013-nusselt-film-condensation.md) | PA | ready | analytical boundary layer |
+| PN-001 | [Film boiling on a horizontal wall](cases/PN-001-film-boiling-horizontal-wall.md) | PN | ready | numerical + Berenson correlation |
+| PE-001 | [Gallium melting in a side-heated cavity](cases/PE-001-gallium-melting-cavity.md) | PE | draft | experiment (Gau & Viskanta) |
 | PC-001 | [Constant-speed planar solidification](cases/PC-001-constant-speed-planar-solidification.md) | PC | ready | exact kinematic |
 | PC-002 | [Constant-rate dissolving bubble](cases/PC-002-constant-rate-bubble.md) | PC | ready | exact kinematic |
 

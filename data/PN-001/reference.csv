@@ -1,0 +1,8 @@
+quantity,value
+capillary_length_lambda0,0.007230164703039606
+critical_wavelength_lambda_c,0.045428464630626914
+most_dangerous_wavelength_lambda_d,0.07868440885009152
+grashof_number,144.60329406079214
+vapor_jakob_number,0.1
+berenson_mean_nusselt_lambda0,2.6529606074068623
+berenson_heat_transfer_coefficient,366.9294845097431

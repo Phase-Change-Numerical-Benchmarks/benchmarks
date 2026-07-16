@@ -671,6 +671,380 @@ def generate_pa009() -> None:
     )
 
 
+def generate_pa010() -> None:
+    radius_0 = 0.5
+    diffusivity = 1.0
+    beta = 0.2  # (c_sigma - c_inf) / rho_b
+
+    # Integrate dR/dt = -D*beta*(1/R + 1/sqrt(pi D t)) with t = tau^2
+    # so that dR/dtau = -2 D beta (tau/R + 1/sqrt(pi D)) is regular at 0.
+    sqrt_pi_d = math.sqrt(math.pi * diffusivity)
+
+    def rhs(tau: float, radius: float) -> float:
+        return -2.0 * diffusivity * beta * (tau / radius + 1.0 / sqrt_pi_d)
+
+    tau = 0.0
+    radius = radius_0
+    dtau = 1.0e-4
+    history: list[tuple[float, float]] = [(0.0, radius_0)]
+    while radius > 0.02 * radius_0:
+        k1 = rhs(tau, radius)
+        k2 = rhs(tau + 0.5 * dtau, radius + 0.5 * dtau * k1)
+        k3 = rhs(tau + 0.5 * dtau, radius + 0.5 * dtau * k2)
+        k4 = rhs(tau + dtau, radius + dtau * k3)
+        radius += dtau / 6.0 * (k1 + 2 * k2 + 2 * k3 + k4)
+        tau += dtau
+        history.append((tau * tau, radius))
+
+    def quasi_steady(time: float) -> float:
+        value = radius_0**2 - 2 * diffusivity * beta * time
+        return math.sqrt(value) if value > 0 else 0.0
+
+    final_time = history[-1][0]
+    sample_times = [t for t in [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35] if t < final_time]
+    sample_times.append(final_time)
+    rows: list[list[object]] = []
+    index = 0
+    for target in sample_times:
+        while index < len(history) - 1 and history[index][0] < target:
+            index += 1
+        time, radius_ode = history[index]
+        rows.append([time, radius_ode, quasi_steady(time)])
+
+    write_csv(
+        ROOT / "data/PA-010/reference.csv",
+        ["time", "radius_epstein_plesset", "radius_quasi_steady"],
+        rows,
+    )
+
+    times = [point[0] for point in history]
+    radii = [point[1] for point in history]
+    plt.figure(figsize=(7.2, 4.3))
+    plt.plot(times, radii, label="Epstein-Plesset ODE", color="#1f77b4")
+    plt.plot(
+        times,
+        [quasi_steady(t) for t in times],
+        label="quasi-steady",
+        color="#ff7f0e",
+        linestyle="--",
+    )
+    plt.legend()
+    save_figure(
+        ROOT / "figures/PA-010-reference.svg",
+        "PA-010 Epstein-Plesset dissolving bubble",
+        "time",
+        "bubble radius",
+    )
+
+
+def generate_pa011() -> None:
+    diffusivity = mp.mpf("0.05")
+    alpha = mp.mpf("1.0")
+    conductivity = mp.mpf("1.0")
+    rho_latent = mp.mpf("1.0")  # rho * L
+    t_melt = mp.mpf("0.0")
+    liquidus_slope = mp.mpf("-0.5")
+    partition = mp.mpf("0.2")
+    c_inf = mp.mpf("1.0")
+    t_inf = mp.mpf("-0.3")
+    t_wall = mp.mpf("-1.5")
+    epsilon = mp.sqrt(diffusivity / alpha)
+
+    def c_interface(lam: mp.mpf) -> mp.mpf:
+        f_lambda = mp.sqrt(mp.pi) * lam * mp.exp(lam**2) * mp.erfc(lam)
+        return c_inf / (1 - (1 - partition) * f_lambda)
+
+    def t_interface(lam: mp.mpf) -> mp.mpf:
+        return t_melt + liquidus_slope * c_interface(lam)
+
+    def residual(lam: mp.mpf) -> mp.mpf:
+        t_gamma = t_interface(lam)
+        arg = lam * epsilon
+        solid_flux = (
+            conductivity
+            * (t_gamma - t_wall)
+            * mp.exp(-(arg**2))
+            / (mp.sqrt(mp.pi * alpha) * mp.erf(arg))
+        )
+        liquid_flux = (
+            conductivity
+            * (t_inf - t_gamma)
+            * mp.exp(-(arg**2))
+            / (mp.sqrt(mp.pi * alpha) * mp.erfc(arg))
+        )
+        return rho_latent * lam * mp.sqrt(diffusivity) - solid_flux + liquid_flux
+
+    lam = mp.findroot(residual, mp.mpf("0.5"))
+    c_gamma = c_interface(lam)
+    t_gamma = t_interface(lam)
+
+    def front(time: float) -> float:
+        return float(2 * lam * mp.sqrt(diffusivity * time))
+
+    def temperature(x: float, time: float) -> float:
+        s = front(time)
+        if x <= s:
+            return float(
+                t_wall
+                + (t_gamma - t_wall)
+                * mp.erf(x / (2 * mp.sqrt(alpha * time)))
+                / mp.erf(lam * epsilon)
+            )
+        return float(
+            t_inf
+            + (t_gamma - t_inf)
+            * mp.erfc(x / (2 * mp.sqrt(alpha * time)))
+            / mp.erfc(lam * epsilon)
+        )
+
+    def concentration(x: float, time: float) -> float:
+        s = front(time)
+        if x <= s:
+            return float(partition * c_gamma)
+        return float(
+            c_inf
+            + (c_gamma - c_inf)
+            * mp.erfc(x / (2 * mp.sqrt(diffusivity * time)))
+            / mp.erfc(lam)
+        )
+
+    rows: list[list[object]] = [
+        ["lambda", float(lam), "", "", ""],
+        ["C_gamma", float(c_gamma), "", "", ""],
+        ["T_gamma", float(t_gamma), "", "", ""],
+    ]
+    for time in [1.0, 4.0, 10.0]:
+        s = front(time)
+        rows.append(["front_position", time, s, "", ""])
+        for x in [0.0, 0.5 * s, s, s + 0.05, s + 0.25, s + 1.0, s + 3.0]:
+            rows.append(["profile", time, x, temperature(x, time), concentration(x, time)])
+
+    write_csv(
+        ROOT / "data/PA-011/reference.csv",
+        ["record", "time_or_value", "x_or_front", "temperature", "concentration"],
+        rows,
+    )
+
+    time_plot = 4.0
+    s_plot = front(time_plot)
+    positions = linspace(0.0, s_plot + 4.0, CURVE_POINTS)
+    figure, (axis_t, axis_c) = plt.subplots(1, 2, figsize=(9.6, 4.3))
+    axis_t.plot(positions, [temperature(x, time_plot) for x in positions], color="#1f77b4")
+    axis_t.axvline(s_plot, color="0.6", linestyle=":")
+    axis_t.set_title("temperature, t = 4")
+    axis_t.set_xlabel("x")
+    axis_t.grid(True, color="0.88", linewidth=0.8)
+    axis_c.plot(positions, [concentration(x, time_plot) for x in positions], color="#d62728")
+    axis_c.axvline(s_plot, color="0.6", linestyle=":")
+    axis_c.set_title("concentration, t = 4")
+    axis_c.set_xlabel("x")
+    axis_c.grid(True, color="0.88", linewidth=0.8)
+    figure.suptitle("PA-011 Rubinstein binary-alloy reference")
+    figure.tight_layout()
+    figure.savefig(ROOT / "figures/PA-011-reference.svg", format="svg")
+    plt.close(figure)
+
+
+def generate_pa012() -> None:
+    diameter_0 = 1.0e-3
+    rho_liquid = 1000.0
+    rho_gas = 1.0
+    diffusivity = 2.5e-5
+    y_surface = 0.05
+    y_far = 0.0
+
+    transfer_number = (y_surface - y_far) / (1.0 - y_surface)
+    evaporation_constant = (
+        8.0 * rho_gas * diffusivity / rho_liquid * math.log1p(transfer_number)
+    )
+    lifetime = diameter_0**2 / evaporation_constant
+
+    def diameter(time: float) -> float:
+        value = diameter_0**2 - evaporation_constant * time
+        return math.sqrt(value) if value > 0 else 0.0
+
+    def mass_rate(time: float) -> float:
+        radius = 0.5 * diameter(time)
+        return 4.0 * math.pi * rho_gas * diffusivity * radius * math.log1p(transfer_number)
+
+    def mass_fraction(r_over_radius: float) -> float:
+        return 1.0 - (1.0 - y_far) * (1.0 + transfer_number) ** (-1.0 / r_over_radius)
+
+    rows: list[list[object]] = [
+        ["B_M", transfer_number, ""],
+        ["K", evaporation_constant, ""],
+        ["t_life", lifetime, ""],
+    ]
+    for fraction in [0.0, 0.1, 0.25, 0.5, 0.75, 0.9]:
+        time = fraction * lifetime
+        rows.append(["d2_history", time, diameter(time) ** 2])
+        rows.append(["mdot_history", time, mass_rate(time)])
+    for r_over_radius in [1.0, 1.25, 1.5, 2.0, 3.0, 5.0, 10.0]:
+        rows.append(["Y_profile", r_over_radius, mass_fraction(r_over_radius)])
+
+    write_csv(
+        ROOT / "data/PA-012/reference.csv",
+        ["record", "time_or_r_over_R", "value"],
+        rows,
+    )
+
+    times = linspace(0.0, lifetime, CURVE_POINTS)
+    figure, (axis_d, axis_y) = plt.subplots(1, 2, figsize=(9.6, 4.3))
+    axis_d.plot(times, [diameter(t) ** 2 * 1e6 for t in times], color="#1f77b4")
+    axis_d.set_title("d2 history")
+    axis_d.set_xlabel("time [s]")
+    axis_d.set_ylabel("d^2 [mm^2]")
+    axis_d.grid(True, color="0.88", linewidth=0.8)
+    ratios = linspace(1.0, 10.0, CURVE_POINTS)
+    axis_y.plot(ratios, [mass_fraction(r) for r in ratios], color="#d62728")
+    axis_y.set_title("vapor mass fraction")
+    axis_y.set_xlabel("r / R")
+    axis_y.set_ylabel("Y")
+    axis_y.grid(True, color="0.88", linewidth=0.8)
+    figure.suptitle("PA-012 d2-law reference")
+    figure.tight_layout()
+    figure.savefig(ROOT / "figures/PA-012-reference.svg", format="svg")
+    plt.close(figure)
+
+
+def generate_pa013() -> None:
+    plate_height = 0.1
+    delta_t = 10.0
+    rho_liquid = 958.4
+    rho_vapor = 0.60
+    mu_liquid = 2.82e-4
+    k_liquid = 0.68
+    h_fg = 2.257e6
+    gravity = 9.81
+
+    factor = (
+        4.0
+        * k_liquid
+        * mu_liquid
+        * delta_t
+        / (gravity * rho_liquid * (rho_liquid - rho_vapor) * h_fg)
+    )
+
+    def thickness(x: float) -> float:
+        return (factor * x) ** 0.25 if x > 0 else 0.0
+
+    def heat_coefficient(x: float) -> float:
+        return k_liquid / thickness(x)
+
+    def mass_flow(x: float) -> float:
+        return (
+            gravity
+            * rho_liquid
+            * (rho_liquid - rho_vapor)
+            * thickness(x) ** 3
+            / (3.0 * mu_liquid)
+        )
+
+    mean_h = 4.0 / 3.0 * heat_coefficient(plate_height)
+    mean_nu = mean_h * plate_height / k_liquid
+
+    rows: list[list[object]] = [
+        ["mean_h", mean_h, "", ""],
+        ["mean_Nu_L", mean_nu, "", ""],
+    ]
+    for fraction in [0.05, 0.1, 0.25, 0.5, 0.75, 1.0]:
+        x = fraction * plate_height
+        rows.append(
+            [
+                "profile",
+                x,
+                thickness(x),
+                4.0 * mass_flow(x) / mu_liquid,
+            ]
+        )
+
+    write_csv(
+        ROOT / "data/PA-013/reference.csv",
+        ["record", "x_or_value", "film_thickness", "film_reynolds"],
+        rows,
+    )
+
+    positions = linspace(1.0e-4 * plate_height, plate_height, CURVE_POINTS)
+    figure, (axis_d, axis_h) = plt.subplots(1, 2, figsize=(9.6, 4.3))
+    axis_d.plot(positions, [thickness(x) * 1e3 for x in positions], color="#1f77b4")
+    axis_d.set_title("film thickness")
+    axis_d.set_xlabel("x [m]")
+    axis_d.set_ylabel("delta [mm]")
+    axis_d.grid(True, color="0.88", linewidth=0.8)
+    axis_h.plot(positions, [heat_coefficient(x) for x in positions], color="#d62728")
+    axis_h.set_title("local heat transfer coefficient")
+    axis_h.set_xlabel("x [m]")
+    axis_h.set_ylabel("h [W/(m^2 K)]")
+    axis_h.grid(True, color="0.88", linewidth=0.8)
+    figure.suptitle("PA-013 Nusselt film condensation reference")
+    figure.tight_layout()
+    figure.savefig(ROOT / "figures/PA-013-reference.svg", format="svg")
+    plt.close(figure)
+
+
+def generate_pn001() -> None:
+    rho_liquid = 200.0
+    rho_vapor = 5.0
+    mu_vapor = 0.005
+    k_vapor = 1.0
+    cp_vapor = 200.0
+    h_fg = 1.0e4
+    sigma = 0.1
+    gravity = 9.81
+    delta_t = 5.0
+
+    delta_rho = rho_liquid - rho_vapor
+    lambda_0 = math.sqrt(sigma / (gravity * delta_rho))
+    lambda_c = 2.0 * math.pi * lambda_0
+    lambda_d = math.sqrt(3.0) * lambda_c
+    h_fg_prime = h_fg + 0.5 * cp_vapor * delta_t
+    nu_berenson = 0.425 * (
+        rho_vapor * delta_rho * gravity * h_fg_prime * lambda_0**3 / (k_vapor * mu_vapor * delta_t)
+    ) ** 0.25
+    h_berenson = nu_berenson * k_vapor / lambda_0
+    grashof = rho_vapor * delta_rho * gravity * lambda_0**3 / mu_vapor**2
+    jakob = cp_vapor * delta_t / h_fg
+
+    write_csv(
+        ROOT / "data/PN-001/reference.csv",
+        ["quantity", "value"],
+        [
+            ["capillary_length_lambda0", lambda_0],
+            ["critical_wavelength_lambda_c", lambda_c],
+            ["most_dangerous_wavelength_lambda_d", lambda_d],
+            ["grashof_number", grashof],
+            ["vapor_jakob_number", jakob],
+            ["berenson_mean_nusselt_lambda0", nu_berenson],
+            ["berenson_heat_transfer_coefficient", h_berenson],
+        ],
+    )
+
+    superheats = linspace(1.0, 25.0, CURVE_POINTS)
+    values = [
+        0.425
+        * (
+            rho_vapor
+            * delta_rho
+            * gravity
+            * (h_fg + 0.5 * cp_vapor * dt)
+            * lambda_0**3
+            / (k_vapor * mu_vapor * dt)
+        )
+        ** 0.25
+        for dt in superheats
+    ]
+    plt.figure(figsize=(7.2, 4.3))
+    plt.plot(superheats, values, color="#1f77b4", label="Berenson mean Nu")
+    plt.axvline(delta_t, color="0.6", linestyle=":", label="benchmark superheat")
+    plt.legend()
+    save_figure(
+        ROOT / "figures/PN-001-reference.svg",
+        "PN-001 film boiling Berenson anchor",
+        "wall superheat",
+        "mean Nusselt number (lambda0)",
+    )
+
+
 GENERATORS = {
     "PA-001": generate_pa001,
     "PA-002": generate_pa002,
@@ -681,6 +1055,11 @@ GENERATORS = {
     "PA-007": generate_pa007,
     "PA-008": generate_pa008,
     "PA-009": generate_pa009,
+    "PA-010": generate_pa010,
+    "PA-011": generate_pa011,
+    "PA-012": generate_pa012,
+    "PA-013": generate_pa013,
+    "PN-001": generate_pn001,
     "PC-001": generate_pc001,
     "PC-002": generate_pc002,
 }
