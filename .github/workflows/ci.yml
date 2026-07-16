@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install matplotlib mpmath
+
+      - name: Validate case files
+        run: python3 scripts/validate_cases.py
+
+      - name: Regenerate reference data
+        run: python3 scripts/plot_reference_figures.py
+
+      - name: Check generated CSV files are in sync
+        run: |
+          git diff --exit-code -- data/ \
+            || { echo "::error::Reference CSV files are stale. Run scripts/plot_reference_figures.py and commit."; exit 1; }

@@ -103,7 +103,9 @@ which drives the velocity jump $[\![\mathbf u\cdot\mathbf n]\!] =
 
 The artificial-fluid property set widely used in the film-boiling
 verification literature (moderate density ratio, thick thermal layers) is
-adopted so results are directly comparable to published simulations.
+adopted so results are directly comparable to published simulations. This
+set is sometimes referred to as the "phantom fluid" and is conventionally
+run at a saturation temperature of 500 K with a wall at 505 K.
 
 | Parameter | Symbol | Value |
 |---|---:|---:|
@@ -118,6 +120,7 @@ adopted so results are directly comparable to published simulations.
 | latent heat | $h_{fg}$ | $10^{4}$ |
 | surface tension | $\sigma$ | 0.1 |
 | gravity | $g$ | 9.81 |
+| saturation temperature | $T_{sat}$ | 500 |
 | wall superheat | $\Delta T$ | 5 |
 
 Derived scales: capillary length $\lambda_0 = \sqrt{\sigma/(g(\rho_l-\rho_v))}$,

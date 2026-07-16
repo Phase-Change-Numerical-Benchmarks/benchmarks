@@ -61,9 +61,6 @@ digitization still pending).
 
 ## Repository Tasks
 
-- Add `data/README.md` describing reference CSV column conventions.
-- Add `figures/README.md` describing how plots are generated.
-- Add a validation script that checks every case frontmatter path exists.
 - Add a BibTeX lint/check step.
 - Add a Markdown link checker.
 - Add issue templates for new benchmark proposals and result submissions.
